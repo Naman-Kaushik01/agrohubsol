@@ -7,7 +7,7 @@ export function useProducts(categorySlug?: string, search?: string) {
     queryFn: async () => {
       let query = supabase
         .from("products")
-        .select("*, product_categories(*), profiles!products_supplier_id_fkey(full_name)")
+        .select("*, product_categories(*), profiles!products_supplier_id_fkey(full_name), reviews(rating)")
         .eq("status", "active")
         .order("created_at", { ascending: false });
 
