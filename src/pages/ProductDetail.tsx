@@ -6,9 +6,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShoppingCart, ArrowLeft, Star, Package } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Package, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { RatingStars } from "@/components/marketplace/RatingStars";
+import { ReviewSection } from "@/components/marketplace/ReviewSection";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -50,12 +52,16 @@ export default function ProductDetail() {
     );
   }
 
-  const avgRating = product.reviews?.length
-    ? (product.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / product.reviews.length).toFixed(1)
-    : null;
+  const reviews = product.reviews || [];
+  const avgRating = reviews.length
+    ? reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length
+    : 0;
 
   const handleAdd = () => {
-    if (!user) { navigate("/login"); return; }
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     addToCart.mutate(
       { productId: product.id, quantity: qty },
       {
@@ -67,15 +73,19 @@ export default function ProductDetail() {
 
   return (
     <Layout>
-      <div className="container py-8">
-        <Button variant="ghost" onClick={() => navigate("/marketplace")} className="mb-6">
+      <div className="container py-8 space-y-12">
+        <Button variant="ghost" onClick={() => navigate("/marketplace")}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Marketplace
         </Button>
 
         <div className="grid md:grid-cols-2 gap-8">
-          <div className="aspect-square bg-muted rounded-lg overflow-hidden">
+          <div className="aspect-square bg-muted rounded-xl overflow-hidden border">
             {product.image_url ? (
-              <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
+              <img
+                src={product.image_url}
+                alt={product.name}
+                className="h-full w-full object-cover"
+              />
             ) : (
               <div className="h-full w-full flex items-center justify-center text-muted-foreground/30">
                 <Package className="h-24 w-24" />
@@ -86,28 +96,33 @@ export default function ProductDetail() {
           <div className="space-y-5">
             <div>
               {product.product_categories && (
-                <Badge variant="secondary" className="mb-2">{product.product_categories.name}</Badge>
+                <Badge variant="secondary" className="mb-2">
+                  {product.product_categories.name}
+                </Badge>
               )}
               <h1 className="text-3xl font-bold">{product.name}</h1>
               {product.profiles && (
-                <p className="text-sm text-muted-foreground mt-1">by {product.profiles.full_name}</p>
+                <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
+                  <User className="h-3.5 w-3.5" />
+                  by {product.profiles.full_name || "Supplier"}
+                </p>
               )}
             </div>
 
-            {avgRating && (
+            {avgRating > 0 && (
               <div className="flex items-center gap-2">
-                <div className="flex">
-                  {[1,2,3,4,5].map(s => (
-                    <Star key={s} className={`h-4 w-4 ${s <= Math.round(Number(avgRating)) ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground/30'}`} />
-                  ))}
-                </div>
-                <span className="text-sm font-medium">{avgRating}</span>
-                <span className="text-sm text-muted-foreground">({product.reviews.length} reviews)</span>
+                <RatingStars value={avgRating} />
+                <span className="text-sm font-medium">{avgRating.toFixed(1)}</span>
+                <span className="text-sm text-muted-foreground">
+                  ({reviews.length} {reviews.length === 1 ? "review" : "reviews"})
+                </span>
               </div>
             )}
 
             <div>
-              <span className="text-3xl font-bold text-primary">${Number(product.price).toFixed(2)}</span>
+              <span className="text-3xl font-bold text-primary">
+                ${Number(product.price).toFixed(2)}
+              </span>
               <span className="text-muted-foreground ml-1">/{product.unit}</span>
             </div>
 
@@ -115,40 +130,46 @@ export default function ProductDetail() {
 
             <div className="text-sm">
               {product.stock_quantity > 0 ? (
-                <span className="text-green-600 font-medium">✓ In Stock ({product.stock_quantity} available)</span>
+                <span className="text-primary font-medium">
+                  ✓ In Stock ({product.stock_quantity} available)
+                </span>
               ) : (
                 <span className="text-destructive font-medium">Out of Stock</span>
               )}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 pt-2">
               <div className="flex items-center border rounded-md">
-                <Button variant="ghost" size="icon" onClick={() => setQty(Math.max(1, qty - 1))}>-</Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setQty(Math.max(1, qty - 1))}
+                >
+                  -
+                </Button>
                 <span className="w-10 text-center font-medium">{qty}</span>
-                <Button variant="ghost" size="icon" onClick={() => setQty(Math.min(product.stock_quantity, qty + 1))}>+</Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setQty(Math.min(product.stock_quantity, qty + 1))}
+                >
+                  +
+                </Button>
               </div>
-              <Button size="lg" onClick={handleAdd} disabled={addToCart.isPending || product.stock_quantity === 0}>
+              <Button
+                size="lg"
+                onClick={handleAdd}
+                disabled={addToCart.isPending || product.stock_quantity === 0}
+              >
                 <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
               </Button>
             </div>
-
-            {/* Reviews */}
-            {product.reviews && product.reviews.length > 0 && (
-              <div className="pt-6 border-t space-y-4">
-                <h3 className="font-semibold text-lg">Reviews</h3>
-                {product.reviews.map((review: any) => (
-                  <div key={review.id} className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      {[1,2,3,4,5].map(s => (
-                        <Star key={s} className={`h-3 w-3 ${s <= review.rating ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground/30'}`} />
-                      ))}
-                    </div>
-                    {review.comment && <p className="text-sm text-muted-foreground">{review.comment}</p>}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
+        </div>
+
+        {/* Reviews */}
+        <div className="border-t pt-10">
+          <ReviewSection productId={product.id} reviews={reviews} />
         </div>
       </div>
     </Layout>
