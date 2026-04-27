@@ -9,7 +9,7 @@ const features = [
   { icon: ShoppingBag, title: "Marketplace", desc: "Browse seeds, fertilizers, pesticides, and tools from verified suppliers.", link: "/marketplace" },
   { icon: Tractor, title: "Equipment Rental", desc: "Rent tractors and farming equipment from trusted contractors.", link: "/marketplace" },
   { icon: Users, title: "Labor Hiring", desc: "Find skilled agricultural workers for your farm operations.", link: "/marketplace" },
-  { icon: GraduationCap, title: "Expert Advice", desc: "Connect with agricultural experts for consultations and guidance.", link: "/marketplace" },
+  { icon: GraduationCap, title: "Expert Advice", desc: "Connect with agricultural experts for consultations and guidance.", link: "/experts" },
 ];
 
 export default function Index() {
