@@ -11,6 +11,7 @@ import Register from "./pages/Register";
 import Marketplace from "./pages/Marketplace";
 import Experts from "./pages/Experts";
 import Equipment from "./pages/Equipment";
+import EquipmentDetail from "./pages/EquipmentDetail";
 import Labor from "./pages/Labor";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/experts" element={<Experts />} />
             <Route path="/equipment" element={<Equipment />} />
+            <Route path="/equipment/:id" element={<EquipmentDetail />} />
             <Route path="/labor" element={<Labor />} />
             <Route path="/marketplace/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
